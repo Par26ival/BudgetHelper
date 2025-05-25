@@ -1,0 +1,91 @@
+description,category,amount,date
+Monthly rent,housing,497.36,2025-02-01
+Monthly rent,housing,519.38,2025-03-03
+Monthly rent,housing,494.21,2025-04-02
+Home insurance,housing,61.55,2025-02-03
+Home insurance,housing,61.48,2025-03-05
+Home insurance,housing,62.41,2025-04-04
+Monthly salary,income,1432.22,2025-02-01
+Monthly salary,income,1429.38,2025-03-03
+Monthly salary,income,1486.24,2025-04-02
+Freelance job,income,443.08,2025-02-15
+Freelance job,income,433.51,2025-03-17
+Freelance job,income,430.71,2025-04-16
+McDonald's breakfast,food,7.05,2025-02-01
+Lunch Subway,food,18.16,2025-02-04
+McDonald's breakfast,food,15.25,2025-02-07
+Groceries Lidl,food,27.96,2025-02-10
+Lunch Subway,food,19.8,2025-02-13
+McDonald's breakfast,food,30.94,2025-02-16
+Groceries Lidl,food,32.29,2025-02-19
+Groceries Lidl,food,9.53,2025-02-22
+Groceries Lidl,food,28.61,2025-02-25
+Lunch Subway,food,30.6,2025-02-28
+Groceries Lidl,food,12.98,2025-03-03
+Groceries Lidl,food,19.86,2025-03-06
+Groceries Lidl,food,13.32,2025-03-09
+Lunch Subway,food,30.75,2025-03-12
+Groceries Lidl,food,23.83,2025-03-15
+McDonald's breakfast,food,10.33,2025-03-18
+Groceries Lidl,food,8.19,2025-03-21
+Lunch Subway,food,34.86,2025-03-24
+Groceries Lidl,food,19.45,2025-03-27
+McDonald's breakfast,food,23.68,2025-03-30
+Groceries Lidl,food,10.74,2025-04-02
+McDonald's breakfast,food,34.87,2025-04-05
+Lunch Subway,food,24.75,2025-04-08
+McDonald's breakfast,food,33.48,2025-04-11
+Lunch Subway,food,13.98,2025-04-14
+Groceries Lidl,food,12.51,2025-04-17
+Lunch Subway,food,16.16,2025-04-20
+Groceries Lidl,food,20.11,2025-04-23
+Lunch Subway,food,13.08,2025-04-26
+Groceries Lidl,food,9.17,2025-04-29
+Monthly metro pass,transport,15.05,2025-02-01
+Monthly metro pass,transport,15.39,2025-03-03
+Monthly metro pass,transport,15.55,2025-04-02
+Uber ride,transport,9.67,2025-02-05
+Uber ride,transport,10.47,2025-02-12
+Uber ride,transport,9.73,2025-02-19
+Uber ride,transport,9.61,2025-02-26
+Uber ride,transport,9.94,2025-03-05
+Uber ride,transport,10.08,2025-03-12
+Uber ride,transport,9.9,2025-03-19
+Uber ride,transport,10.45,2025-03-26
+Uber ride,transport,10.27,2025-04-02
+Uber ride,transport,9.54,2025-04-09
+Uber ride,transport,9.81,2025-04-16
+Uber ride,transport,10.02,2025-04-23
+Netflix,entertainment,19.55,2025-02-01
+Netflix,entertainment,20.51,2025-03-03
+Netflix,entertainment,20.89,2025-04-02
+Spotify,entertainment,9.56,2025-02-02
+Spotify,entertainment,9.77,2025-03-04
+Spotify,entertainment,9.59,2025-04-03
+Pharmacy supplies,health,11.73,2025-02-10
+Pharmacy supplies,health,12.51,2025-03-10
+Pharmacy supplies,health,12.33,2025-04-07
+Clinic visit,health,35.21,2025-02-20
+Clinic visit,health,33.55,2025-03-22
+Clinic visit,health,33.6,2025-04-21
+Haircut,personal,18.66,2025-02-06
+Haircut,personal,17.22,2025-03-08
+Haircut,personal,18.71,2025-04-07
+Period supplies,personal,13.65,2025-02-04
+Period supplies,personal,13.46,2025-03-04
+Period supplies,personal,13.32,2025-04-01
+New shoes,shopping,29.72,2025-02-01
+DM cosmetics,shopping,47.1,2025-02-11
+DM cosmetics,shopping,75.72,2025-02-21
+New shoes,shopping,22.92,2025-03-03
+T-shirt Zara,shopping,69.14,2025-03-13
+DM cosmetics,shopping,55.3,2025-03-23
+New shoes,shopping,72.12,2025-04-02
+DM cosmetics,shopping,46.06,2025-04-12
+T-shirt Zara,shopping,25.36,2025-04-22
+Electric bill,utilities,92.07,2025-02-05
+Electric bill,utilities,90.0,2025-03-07
+Electric bill,utilities,93.3,2025-04-06
+Internet,utilities,39.61,2025-02-07
+Internet,utilities,40.69,2025-03-09
+Internet,utilities,39.25,2025-04-08

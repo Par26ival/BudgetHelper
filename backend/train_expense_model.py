@@ -67,38 +67,38 @@ data = [
 ]
 
 
-df = pd.DataFrame(data)
+#df = pd.DataFrame(data)
+df = pd.read_csv("transactions.csv")
 
-# 2. Convert date to datetime
+# 2. Convert 'date' column to datetime
 df["date"] = pd.to_datetime(df["date"])
 
 # 3. Extract temporal features
 df["day"] = df["date"].dt.day
-df["weekday"] = df["date"].dt.weekday  # Monday=0
+df["weekday"] = df["date"].dt.weekday  # 0 = Monday
 df["month"] = df["date"].dt.month
 
-# 4. Features and target
+# 4. Select features and target
 X = df[["amount", "description", "day", "weekday", "month"]]
 y = df["category"]
 
-# 5. Preprocessor (handle numeric + text + categorical)
+# 5. Define column transformer (numeric + text + time features)
 preprocessor = ColumnTransformer(
     transformers=[
-        ("amount", StandardScaler(), ["amount"]),
-        ("description", TfidfVectorizer(), "description"),
-        ("time_features", StandardScaler(), ["day", "weekday", "month"])
+        ("num", StandardScaler(), ["amount", "day", "weekday", "month"]),
+        ("text", TfidfVectorizer(), "description")
     ]
 )
 
-# 6. Pipeline = preprocessing + model
+# 6. Build pipeline: preprocess + classifier
 pipeline = make_pipeline(preprocessor, RandomForestClassifier(n_estimators=100, random_state=42))
 
 # 7. Train/test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# 8. Train
+# 8. Fit model
 pipeline.fit(X_train, y_train)
 
-# 9. Save model
+# 9. Save trained model
 joblib.dump(pipeline, "model.joblib")
-print("✅ Model trained with temporal features and saved as model.joblib")
+print("✅ Model trained with temporal and textual features. Saved as model.joblib.")
