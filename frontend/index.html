@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BudgetHelper</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header>
+    <h1>💳 BudgetHelper</h1>
+    <p>Smart Expense Tracker & Predictor</p>
+  </header>
+
+  <main class="main-container">
+    <section class="left-panel">
+      <h2>📄 Transaction History</h2>
+      <ul id="transactionList"></ul>
+    </section>
+
+    <section class="right-panel">
+      <section class="form-section">
+        <h3>Add Transaction</h3>
+        <form id="transactionForm">
+          <input type="number" id="amount" placeholder="Amount in BGN" required />
+          <input type="text" id="description" placeholder="Description" required />
+          <input type="date" id="date" required />
+
+          <div class="radio-group">
+            <label><input type="radio" name="type" value="spending" checked /> Spending</label>
+            <label><input type="radio" name="type" value="income" /> Income</label>
+          </div>
+
+          <button type="submit">➕ Add</button>
+        </form>
+        <p id="prediction" class="prediction"></p>
+      </section>
+
+      <section class="forecast-section">
+        <h3>Next Predicted Transactions</h3>
+        <button id="predictButton">🔮 Predict Next</button>
+        <ul id="forecastList"></ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
