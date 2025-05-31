@@ -4,3 +4,4 @@ flasgger
 pandas
 scikit-learn
 joblib
+pytest
