@@ -114,3 +114,31 @@ li.income {
     border-left: 4px solid #00753a;
     border-radius: 4px;
 }
+
+.login-container {
+  max-width: 400px;
+  margin: 5rem auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.login-container input {
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.6rem;
+  font-size: 1rem;
+}
+.login-container button {
+  width: 100%;
+  padding: 0.6rem;
+  background: #00753a;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+}
+.login-container button:hover {
+  background: #005b2d;
+}

@@ -2,14 +2,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from models.transaction_model import Transaction
 from extensions import db
+from flasgger import Swagger
 import joblib
 import os
 import pandas as pd
 from datetime import datetime, timedelta
 
-
 app = Flask(__name__)
 CORS(app)
+Swagger(app)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///transactions.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -39,7 +40,6 @@ def add_transaction():
     if type_ == "income":
         category = "income"
     else:
-        # Extract day, weekday, month
         dt = pd.to_datetime(date)
         input_df = pd.DataFrame(
             [
@@ -66,30 +66,38 @@ def add_transaction():
 def predict_next_30_days():
     transactions = Transaction.query.all()
     if not transactions:
-        return jsonify({
-            "forecast": [],
-            "total_income": 0.0,
-            "total_spending": 0.0,
-            "net_savings": 0.0
-        })
+        return jsonify(
+            {
+                "forecast": [],
+                "total_income": 0.0,
+                "total_spending": 0.0,
+                "net_savings": 0.0,
+            }
+        )
 
     df = pd.DataFrame([t.to_dict() for t in transactions])
     df["date"] = pd.to_datetime(df["date"])
-
     today = datetime.today()
     end_date = today + timedelta(days=30)
 
-    # Normalize descriptions
     def normalize(desc):
         desc = desc.lower()
-        if "rent" in desc: return "rent"
-        if "salary" in desc: return "salary"
-        if "pad" in desc or "period" in desc: return "period supplies"
-        if "spotify" in desc: return "spotify"
-        if "netflix" in desc: return "netflix"
-        if "grocer" in desc or "lidl" in desc or "billa" in desc: return "groceries"
-        if "electric" in desc: return "electric bill"
-        if "internet" in desc: return "internet"
+        keywords = {
+            "rent": "rent",
+            "salary": "salary",
+            "pad": "period supplies",
+            "period": "period supplies",
+            "spotify": "spotify",
+            "netflix": "netflix",
+            "lidl": "groceries",
+            "billa": "groceries",
+            "grocer": "groceries",
+            "electric": "electric bill",
+            "internet": "internet",
+        }
+        for k, v in keywords.items():
+            if k in desc:
+                return v
         return desc
 
     df["normalized"] = df["description"].apply(normalize)
@@ -99,50 +107,56 @@ def predict_next_30_days():
     total_spending = 0.0
 
     grouped = df.groupby(["normalized", "type"])
-
     for (desc, typ), group in grouped:
         if len(group) < 2:
             continue
-
         group = group.sort_values("date")
         deltas = group["date"].diff().dropna().dt.days
         if deltas.empty:
             continue
-
         avg_days = int(deltas.mean())
         if avg_days > 90 or avg_days == 0:
             continue
 
         avg_amount = round(group["amount"].mean(), 2)
         last_date = group["date"].max()
-
-        # How many times will this transaction occur in the next 30 days?
-        occurrences = max(1, (30 // avg_days))  # Ensure at least 1 if avg_days < 30
+        occurrences = max(1, (30 // avg_days))
         total_amount = round(avg_amount * occurrences, 2)
 
-        # Forecast next occurrence
         predicted_date = last_date + timedelta(days=avg_days)
         if predicted_date.date() <= end_date.date():
-            forecast.append({
-                "description": desc,
-                "type": typ,
-                "date": predicted_date.date().isoformat(),
-                "amount": avg_amount,
-                "expected_occurrences": occurrences,
-                "total_estimate": total_amount
-            })
-
+            forecast.append(
+                {
+                    "description": desc,
+                    "type": typ,
+                    "date": predicted_date.date().isoformat(),
+                    "amount": avg_amount,
+                    "expected_occurrences": occurrences,
+                    "total_estimate": total_amount,
+                }
+            )
             if typ == "income":
                 total_income += total_amount
             else:
                 total_spending += total_amount
 
-    return jsonify({
-        "forecast": forecast,
-        "total_income": round(total_income, 2),
-        "total_spending": round(total_spending, 2),
-        "net_savings": round(total_income - total_spending, 2)
-    })
+    return jsonify(
+        {
+            "forecast": forecast,
+            "total_income": round(total_income, 2),
+            "total_spending": round(total_spending, 2),
+            "net_savings": round(total_income - total_spending, 2),
+        }
+    )
+
+
+@app.route("/api/stats/monthly")
+def monthly_stats():
+    df = pd.read_csv("transactions.csv", parse_dates=["date"])
+    df["month"] = df["date"].dt.to_period("M").astype(str)
+    monthly = df.groupby("month")["amount"].sum().reset_index()
+    monthly = monthly.rename(columns={"amount": "total_spent"})
+    return jsonify(monthly.to_dict(orient="records"))
 
 
 if __name__ == "__main__":

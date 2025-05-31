@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BudgetHelper</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
   <header>
     <h1>💳 BudgetHelper</h1>
@@ -43,10 +42,14 @@
         <button id="predictButton">🔮 Predict Next</button>
         <ul id="forecastList"></ul>
       </section>
+
+      <section class="chart-section">
+        <h3>📊 3-Month Spending by Category</h3>
+        <canvas id="spendingChart" width="400" height="200"></canvas>
+      </section>
     </section>
   </main>
 
   <script src="app.js"></script>
 </body>
-
 </html>
