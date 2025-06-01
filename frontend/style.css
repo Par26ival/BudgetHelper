@@ -115,30 +115,26 @@ li.income {
     border-radius: 4px;
 }
 
-.login-container {
-  max-width: 400px;
-  margin: 5rem auto;
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  text-align: center;
+/* Add this to your existing style.css */
+.logout-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+    margin-left: auto; /* Push it to the right */
 }
-.login-container input {
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.6rem;
-  font-size: 1rem;
+
+.logout-btn:hover {
+    background-color: #c82333;
 }
-.login-container button {
-  width: 100%;
-  padding: 0.6rem;
-  background: #00753a;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 5px;
-}
-.login-container button:hover {
-  background: #005b2d;
+
+header {
+    display: flex; /* Make header a flex container */
+    justify-content: space-between; /* Space out items */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 25px;
 }

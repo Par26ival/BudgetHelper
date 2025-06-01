@@ -1,78 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login – BudgetHelper</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>BudgetHelper Login</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f8f8f8; }
+    form { max-width: 400px; margin: auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
+    input { width: 100%; padding: 0.5em; margin-bottom: 1em; }
+    button { width: 100%; padding: 0.5em; }
+    .switch { text-align: center; margin-top: 1em; cursor: pointer; color: blue; }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <h1>🔒 BudgetHelper Login</h1>
-
-    <form id="loginForm">
-      <input type="text" id="username" placeholder="Username" required />
-      <input type="password" id="password" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
-
-    <hr />
-    <h2>Register</h2>
-    <form id="registerForm">
-      <input type="text" id="regUsername" placeholder="New Username" required />
-      <input type="password" id="regPassword" placeholder="New Password" required />
-      <button type="submit">Register</button>
-    </form>
-
-    <p id="loginMessage" class="prediction"></p>
-  </div>
+  <form id="authForm">
+    <h2 id="formTitle">Login</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit" id="submitBtn">Login</button>
+    <div class="switch" onclick="toggleMode()">Don't have an account? Register here</div>
+    <p id="message" style="color: red; text-align: center;"></p>
+  </form>
 
   <script>
-    const API_BASE = "http://localhost:5000/login";
+    let isLogin = true;
 
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    function toggleMode() {
+      isLogin = !isLogin;
+      document.getElementById("formTitle").innerText = isLogin ? "Login" : "Register";
+      document.getElementById("submitBtn").innerText = isLogin ? "Login" : "Register";
+      document.querySelector(".switch").innerText = isLogin ? "Don't have an account? Register here" : "Already have an account? Login here";
+      document.getElementById("message").innerText = "";
+    }
+
+    document.getElementById("authForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
+      const endpoint = isLogin ? "/login" : "/register";
 
-      const res = await fetch(`${API_BASE}/login`, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ username, password })
       });
 
       const data = await res.json();
-      const msg = document.getElementById("loginMessage");
-
       if (res.ok) {
-        msg.innerText = "✅ Login successful. Redirecting...";
-        setTimeout(() => window.location.href = "index.html", 1500);
+        window.location.href = data.redirect;
       } else {
-        msg.innerText = "❌ " + (data.error || "Login failed.");
-      }
-    });
-
-    document.getElementById("registerForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const username = document.getElementById("regUsername").value;
-      const password = document.getElementById("regPassword").value;
-
-      const res = await fetch(`${API_BASE}/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await res.json();
-      const msg = document.getElementById("loginMessage");
-
-      if (res.ok) {
-        msg.innerText = "✅ Registered successfully. You can now log in.";
-        document.getElementById("registerForm").reset();
-      } else {
-        msg.innerText = "❌ " + (data.error || "Registration failed.");
+        document.getElementById("message").innerText = data.message || "Something went wrong.";
       }
     });
   </script>
