@@ -3,36 +3,36 @@ import sys
 import os
 import pytest
 
-# Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app import app, db
-from models.user_model import User
+from models import User
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def client():
     app.config["TESTING"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["WTF_CSRF_ENABLED"] = False
-    with app.test_client() as client:
-        with app.app_context():
-            db.create_all()
-            user = User(username="testuser")
-            user.set_password("testpass")
+
+    with app.app_context():
+        db.create_all()
+
+        # Only create user if not already present (in memory DB is fresh each test)
+        if not User.query.filter_by(username="testuser1").first():
+            user = User(username="testuser1")
+            user.set_password("testpass1")
             db.session.add(user)
             db.session.commit()
 
-        # Log in the test user
+    with app.test_client() as client:
+        # Login
         client.post("/login", data={
             "username": "testuser1",
             "password": "testpass1"
         })
-
         yield client
 
-        # Cleanup
-        with app.app_context():
-            db.session.remove()
-            db.drop_all()
+    # No need to drop db, memory DB is gone after function scope
 
 def test_add_transaction(client):
     response = client.post("/transactions", json={
