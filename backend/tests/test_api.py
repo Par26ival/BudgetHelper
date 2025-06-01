@@ -6,7 +6,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app import app, db
-from models import User
+from models.user_model import User
 
 @pytest.fixture(scope="function")
 def client():
