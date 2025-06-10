@@ -1,56 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BudgetHelper</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
   <header>
     <h1>💳 BudgetHelper</h1>
     <p>Smart Expense Tracker & Predictor</p>
-    <button id="logoutButton" style="float: right; margin-top: -50px;">Logout</button>
+    <button id="logoutButton" class="logout-btn">Logout</button>
   </header>
 
   <main class="main-container">
     <section class="left-panel">
       <h2>📄 Transaction History</h2>
-      <ul id="transactionList"></ul>
+      <div class="transaction-list-container">
+        <ul id="transactionList"></ul>
+      </div>
     </section>
 
     <section class="right-panel">
       <section class="form-section">
-        <h3>Add Transaction</h3>
+        <h3>Add New Transaction</h3>
         <form id="transactionForm">
-          <input type="number" id="amount" placeholder="Amount in BGN" required />
-          <input type="text" id="description" placeholder="Description" required />
-          <input type="date" id="date" required />
-
-          <div class="radio-group">
-            <label><input type="radio" name="type" value="spending" checked /> Spending</label>
-            <label><input type="radio" name="type" value="income" /> Income</label>
+          <div class="form-group">
+            <input type="number" id="amount" placeholder="Amount in BGN" required step="0.01" min="0" />
           </div>
-
-          <button type="submit">➕ Add</button>
+          <div class="form-group">
+            <input type="text" id="description" placeholder="Description" required />
+          </div>
+          <div class="form-group">
+            <input type="date" id="date" required />
+          </div>
+          <div class="form-group radio-group">
+            <label>
+              <input type="radio" name="type" value="spending" checked />
+              Spending
+            </label>
+            <label>
+              <input type="radio" name="type" value="income" />
+              Income
+            </label>
+          </div>
+          <button type="submit" class="submit-btn">➕ Add Transaction</button>
         </form>
         <p id="prediction" class="prediction"></p>
       </section>
 
       <section class="forecast-section">
-        <h3>Next Predicted Transactions</h3>
-        <button id="predictButton">🔮 Predict Next</button>
-        <ul id="forecastList"></ul>
+        <h3>Financial Overview</h3>
+        <button id="predictButton" class="predict-btn">🔮 Generate Report</button>
+        <div class="forecast-container">
+          <ul id="forecastList"></ul>
+        </div>
       </section>
 
       <section class="chart-section">
-        <h3>📊 3-Month Spending by Category</h3>
-        <canvas id="spendingChart" width="400" height="200"></canvas>
+        <h3>📊 Monthly Spending Trends</h3>
+        <div class="chart-container">
+          <canvas id="spendingChart"></canvas>
+        </div>
       </section>
     </section>
   </main>
 
   <script src="app.js"></script>
 </body>
+
 </html>

@@ -1,56 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>BudgetHelper Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - BudgetHelper</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    body { font-family: sans-serif; padding: 2em; background: #f8f8f8; }
-    form { max-width: 400px; margin: auto; background: white; padding: 2em; border-radius: 8px; box-shadow: 0 0 10px #ccc; }
-    input { width: 100%; padding: 0.5em; margin-bottom: 1em; }
-    button { width: 100%; padding: 0.5em; }
-    .switch { text-align: center; margin-top: 1em; cursor: pointer; color: blue; }
-  </style>
-</head>
-<body>
-  <form id="authForm">
-    <h2 id="formTitle">Login</h2>
-    <input type="text" id="username" placeholder="Username" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <button type="submit" id="submitBtn">Login</button>
-    <div class="switch" onclick="toggleMode()">Don't have an account? Register here</div>
-    <p id="message" style="color: red; text-align: center;"></p>
-  </form>
-
-  <script>
-    let isLogin = true;
-
-    function toggleMode() {
-      isLogin = !isLogin;
-      document.getElementById("formTitle").innerText = isLogin ? "Login" : "Register";
-      document.getElementById("submitBtn").innerText = isLogin ? "Login" : "Register";
-      document.querySelector(".switch").innerText = isLogin ? "Don't have an account? Register here" : "Already have an account? Login here";
-      document.getElementById("message").innerText = "";
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    document.getElementById("authForm").addEventListener("submit", async (e) => {
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group label {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .form-group input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .login-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .login-btn:hover {
+      background-color: #45a049;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .register-link a {
+      color: #4CAF50;
+      text-decoration: none;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: #ff0000;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <h1>💳 BudgetHelper</h1>
+    <h2>Login</h2>
+    <form id="loginForm" class="login-form" autocomplete="on">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn">Login</button>
+      <div id="errorMessage" class="error-message"></div>
+    </form>
+    <div class="register-link">
+      <p>Don't have an account? <a href="#" id="showRegister">Register here</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Use the current origin for API calls
+    const API_BASE_URL = window.location.origin;
+    const loginForm = document.getElementById("loginForm");
+    const errorMessage = document.getElementById("errorMessage");
+    const showRegister = document.getElementById("showRegister");
+
+    // Remove any query parameters from the URL
+    if (window.location.search) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
-      const endpoint = isLogin ? "/login" : "/register";
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
+      try {
+        const response = await fetch(`${API_BASE_URL}/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Store user info in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          // Redirect to the main page
+          window.location.href = data.redirect;
+        } else {
+          errorMessage.textContent = data.message || "Login failed";
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMessage.textContent = "An error occurred. Please try again.";
+      }
+    });
+
+    showRegister.addEventListener("click", (e) => {
+      e.preventDefault();
+      const registerForm = `
+                <h2>Register</h2>
+                <form id="registerForm" class="login-form" autocomplete="on">
+                    <div class="form-group">
+                        <label for="regUsername">Username</label>
+                        <input type="text" id="regUsername" name="username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <input type="password" id="regPassword" name="password" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="login-btn">Register</button>
+                </form>
+                <div class="register-link">
+                    <p>Already have an account? <a href="#" id="showLogin">Login here</a></p>
+                </div>
+            `;
+
+      document.querySelector(".login-container").innerHTML = registerForm;
+
+      document.getElementById("registerForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("regUsername").value;
+        const password = document.getElementById("regPassword").value;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/register`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            window.location.href = data.redirect;
+          } else {
+            errorMessage.textContent = data.message || "Registration failed";
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          errorMessage.textContent = "An error occurred. Please try again.";
+        }
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        window.location.href = data.redirect;
-      } else {
-        document.getElementById("message").innerText = data.message || "Something went wrong.";
-      }
+      document.getElementById("showLogin").addEventListener("click", (e) => {
+        e.preventDefault();
+        window.location.reload();
+      });
     });
   </script>
 </body>
+
 </html>

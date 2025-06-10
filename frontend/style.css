@@ -117,7 +117,8 @@ li.income {
 
 /* Add this to your existing style.css */
 .logout-btn {
-    background-color: #dc3545; /* Red */
+    background-color: #dc3545;
+    /* Red */
     color: white;
     padding: 8px 15px;
     border: none;
@@ -125,7 +126,8 @@ li.income {
     cursor: pointer;
     font-size: 0.9em;
     transition: background-color 0.3s ease;
-    margin-left: auto; /* Push it to the right */
+    margin-left: auto;
+    /* Push it to the right */
 }
 
 .logout-btn:hover {
@@ -133,8 +135,119 @@ li.income {
 }
 
 header {
-    display: flex; /* Make header a flex container */
-    justify-content: space-between; /* Space out items */
-    align-items: center; /* Vertically align items */
+    display: flex;
+    /* Make header a flex container */
+    justify-content: space-between;
+    /* Space out items */
+    align-items: center;
+    /* Vertically align items */
     margin-bottom: 25px;
+}
+
+/* Transaction List Styles */
+.transaction-list {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-list th {
+    background-color: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.transaction-row {
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s;
+}
+
+.transaction-row:hover {
+    background-color: #f8f9fa;
+}
+
+.transaction-row.income {
+    background-color: #e8f5e9;
+}
+
+.transaction-row.spending {
+    background-color: #fff;
+}
+
+.transaction-description {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.transaction-description .description {
+    font-weight: 500;
+    color: #212529;
+}
+
+.transaction-description .category {
+    font-size: 0.85em;
+    color: #6c757d;
+    text-transform: capitalize;
+}
+
+.transaction-amount {
+    padding: 12px;
+    font-weight: 600;
+    text-align: right;
+}
+
+.transaction-amount.income {
+    color: #28a745;
+}
+
+.transaction-amount.spending {
+    color: #dc3545;
+}
+
+.transaction-date {
+    padding: 12px;
+    color: #6c757d;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+.empty-state,
+.error-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.empty-state p,
+.error-state p {
+    color: #6c757d;
+    margin: 0;
+}
+
+.error-state p {
+    color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .transaction-list {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .transaction-date {
+        white-space: nowrap;
+    }
 }
