@@ -184,19 +184,14 @@ def add_transaction():
         if type_ == "income":
             category = "income"
         else:
-            dt = pd.to_datetime(date)
-            input_df = pd.DataFrame(
-                [
-                    {
-                        "amount": amount,
-                        "description": description,
-                        "day": dt.day,
-                        "weekday": dt.weekday(),
-                        "month": dt.month,
-                    }
-                ]
-            )
-            category = model.predict(input_df)[0]
+            # Convert date string to datetime
+            dt = datetime.fromisoformat(date.replace("Z", "+00:00"))
+
+            # Create feature array for prediction
+            features = np.array([[float(amount), dt.day, dt.weekday(), dt.month]])
+
+            # Get prediction from model
+            category = model.predict(features)[0]
 
         new_transaction = Transaction(
             description=description,
@@ -228,8 +223,8 @@ def predict():
         transactions = (
             Transaction.query.filter(
                 Transaction.user_id == current_user.id,
-                Transaction.date >= cutoff_date,
-                Transaction.date <= today,
+                Transaction.date >= cutoff_date.isoformat(),
+                Transaction.date <= today.isoformat(),
             )
             .order_by(Transaction.date.desc())
             .all()
