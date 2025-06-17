@@ -1,23 +1,18 @@
-import csv
+import pandas as pd
 from extensions import db
 from app import app
 from models.transaction_model import Transaction
 
-# Read CSV file
-transactions = []
-with open("transactions.csv", "r") as file:
-    csv_reader = csv.DictReader(file)
-    for row in csv_reader:
-        transactions.append(row)
+df = pd.read_csv("transactions.csv")
 
 with app.app_context():
     db.drop_all()
     db.create_all()
 
-    for row in transactions:
+    for _, row in df.iterrows():
         tx = Transaction(
             description=row["description"],
-            amount=float(row["amount"]),
+            amount=row["amount"],
             category=row["category"],
             type=row["category"] if row["category"] == "income" else "spending",
             date=row["date"],

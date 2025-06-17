@@ -16,53 +16,40 @@ from flask_login import login_user, logout_user, login_required, current_user
 from flasgger import Swagger
 import joblib
 import os
-import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta, timezone
 from collections import Counter
 import json
 
-app = Flask(__name__, static_folder="../frontend/build", static_url_path="")
+app = Flask(__name__, static_folder="../frontend", static_url_path="")
 
 # Configure CORS properly
 CORS(
     app,
     supports_credentials=True,
-    origins=[
-        "http://localhost:5000",
-        "http://127.0.0.1:5000",
-        "https://tomovi.eu",
-        "https://*.vercel.app",
-    ],
+    origins=["http://localhost:5000", "http://127.0.0.1:5000", "https://tomovi.eu"],
     allow_headers=["Content-Type"],
     methods=["GET", "POST", "OPTIONS"],
 )
 
 # Configure session
-app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SECURE"] = True  # Enable for HTTPS
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your_secret_key_here")
-
-# Configure database for Vercel
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", "sqlite:///transactions.db"
-)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "your_secret_key_here"  # Change this to a secure secret key
 
 Swagger(app)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///transactions.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = "login"
-login_manager.session_protection = "strong"
-
-# Load model
-model = joblib.load(os.path.join(os.path.dirname(__file__), "model.joblib"))
-
-# Create tables if they don't exist
-with app.app_context():
-    db.create_all()
+login_manager.session_protection = (
+    "strong"  # This will invalidate sessions when IP changes
+)
 
 
 @login_manager.unauthorized_handler
@@ -73,6 +60,12 @@ def unauthorized():
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
+
+
+with app.app_context():
+    db.create_all()
+
+model = joblib.load(os.path.join(os.path.dirname(__file__), "model.joblib"))
 
 
 @app.route("/")
@@ -184,14 +177,19 @@ def add_transaction():
         if type_ == "income":
             category = "income"
         else:
-            # Convert date string to datetime
-            dt = datetime.fromisoformat(date.replace("Z", "+00:00"))
-
-            # Create feature array for prediction
-            features = np.array([[float(amount), dt.day, dt.weekday(), dt.month]])
-
-            # Get prediction from model
-            category = model.predict(features)[0]
+            dt = pd.to_datetime(date)
+            input_df = pd.DataFrame(
+                [
+                    {
+                        "amount": amount,
+                        "description": description,
+                        "day": dt.day,
+                        "weekday": dt.weekday(),
+                        "month": dt.month,
+                    }
+                ]
+            )
+            category = model.predict(input_df)[0]
 
         new_transaction = Transaction(
             description=description,
@@ -223,8 +221,8 @@ def predict():
         transactions = (
             Transaction.query.filter(
                 Transaction.user_id == current_user.id,
-                Transaction.date >= cutoff_date.isoformat(),
-                Transaction.date <= today.isoformat(),
+                Transaction.date >= cutoff_date,
+                Transaction.date <= today,
             )
             .order_by(Transaction.date.desc())
             .all()
@@ -265,4 +263,7 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run()
+    print("\n=== BudgetHelper Server ===")
+    print("Please visit: http://localhost:5000/login")
+    print("=======================\n")
+    app.run(debug=True)
