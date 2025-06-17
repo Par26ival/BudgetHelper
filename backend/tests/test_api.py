@@ -39,7 +39,7 @@ def test_add_transaction(client):
         "amount": 100.0,
         "description": "Test payment",
         "type": "income",
-        "date": "2025-06-01"
+        "date": "2025-06-03"
     })
     assert response.status_code == 201
 
@@ -51,7 +51,7 @@ def test_get_transactions(client):
         "amount": 50.0,
         "description": "Groceries",
         "type": "expense",
-        "date": "2025-06-01"
+        "date": "2025-06-02"
     })
     response = client.get("/transactions")
     assert response.status_code == 200

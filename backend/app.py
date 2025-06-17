@@ -17,34 +17,57 @@ from flasgger import Swagger
 import joblib
 import os
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from collections import Counter
+import json
 
-app = Flask(__name__, static_folder="../frontend", static_url_path="")
+app = Flask(__name__, static_folder="../frontend/build", static_url_path="")
 
 # Configure CORS properly
 CORS(
     app,
     supports_credentials=True,
-    origins=["http://localhost:5000", "http://127.0.0.1:5000"],
+    origins=[
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "https://tomovi.eu",
+        "https://*.vercel.app",
+    ],
     allow_headers=["Content-Type"],
     methods=["GET", "POST", "OPTIONS"],
 )
 
 # Configure session
-app.config["SESSION_COOKIE_SECURE"] = False
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
-app.config["SECRET_KEY"] = "your_secret_key_here"
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=10)
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "your_secret_key_here")
+
+# Configure database for Vercel
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
+    "DATABASE_URL", "sqlite:///transactions.db"
+)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 Swagger(app)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///transactions.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.session_protection = "strong"
+
+# Load model
+model = joblib.load(os.path.join(os.path.dirname(__file__), "model.joblib"))
+
+# Create tables if they don't exist
+with app.app_context():
+    db.create_all()
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect("/login")
 
 
 @login_manager.user_loader
@@ -52,16 +75,8 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-with app.app_context():
-    db.create_all()
-
-model = joblib.load(os.path.join(os.path.dirname(__file__), "model.joblib"))
-
-
 @app.route("/")
 def home():
-    if current_user.is_authenticated:
-        return redirect("/index.html")
     return redirect("/login")
 
 
@@ -145,7 +160,12 @@ def get_transactions():
             .order_by(Transaction.date.desc())
             .all()
         )
-        return jsonify([t.to_dict() for t in transactions])
+        response = jsonify([t.to_dict() for t in transactions])
+        # Add user info to response headers
+        response.headers["X-User-Info"] = json.dumps(
+            {"username": current_user.username, "id": current_user.id}
+        )
+        return response
     except Exception as e:
         print(f"Error fetching transactions: {str(e)}")
         return jsonify({"error": str(e)}), 500
@@ -199,9 +219,9 @@ def add_transaction():
 @login_required
 def predict():
     try:
-        today = datetime.utcnow().date()
+        today = datetime.now(timezone.utc)
         print(f"[PREDICT] Backend 'today' date: {today}")
-        cutoff_date = today - timedelta(days=30)
+        cutoff_date = today - timedelta(days=30)  # Look at last 30 days
         print(f"Fetching transactions from {cutoff_date} to {today}")
 
         # Get transactions from the last 30 days
@@ -215,37 +235,25 @@ def predict():
             .all()
         )
 
-        # Calculate average daily spending
-        spending = [t.amount for t in transactions if t.type != "income"]
-        total_spending = sum(spending)
-        days_with_spending = len(
-            set(t.date for t in transactions if t.type != "income")
-        )
-        avg_daily_spending = (
-            total_spending / days_with_spending if days_with_spending else 0
-        )
-        predicted_spending = avg_daily_spending * 30
-
-        # Predict income: use the most recent income transaction (simulate monthly salary)
+        # Calculate total income from last 30 days
         income_transactions = [t for t in transactions if t.type == "income"]
-        if income_transactions:
-            # Use the most recent income as the prediction
-            predicted_income = income_transactions[0].amount
-        else:
-            predicted_income = 0.0
+        total_income = sum(t.amount for t in income_transactions)
 
-        # Category breakdown for spending
+        # Calculate total spending and spending by category from last 30 days
+        spending_transactions = [t for t in transactions if t.type != "income"]
+        total_spending = sum(t.amount for t in spending_transactions)
+
+        # Group spending by category
         spending_by_category = {}
-        for t in transactions:
-            if t.type != "income":
-                category = t.category if t.category else "uncategorized"
-                spending_by_category[category] = (
-                    spending_by_category.get(category, 0) + t.amount
-                )
+        for t in spending_transactions:
+            category = t.category if t.category else "uncategorized"
+            spending_by_category[category] = (
+                spending_by_category.get(category, 0) + t.amount
+            )
 
         result = {
-            "predicted_spending": round(predicted_spending, 2),
-            "predicted_income": round(predicted_income, 2),
+            "predicted_spending": round(total_spending, 2),
+            "predicted_income": round(total_income, 2),
             "spending_by_category": {
                 k: round(v, 2) for k, v in spending_by_category.items()
             },
@@ -262,4 +270,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

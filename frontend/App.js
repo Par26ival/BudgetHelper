@@ -16,8 +16,8 @@ const defaultFetchOptions = {
   }
 };
 
-// Load and display transactions
-async function loadTransactions() {
+// Get current user information
+async function getCurrentUser() {
   try {
     const response = await fetch(`${API_BASE_URL}/transactions`, {
       method: "GET",
@@ -29,14 +29,49 @@ async function loadTransactions() {
 
     if (!response.ok) {
       if (response.status === 401) {
-        // If unauthorized, redirect to login
         window.location.href = "/login";
         return;
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const transactions = await response.json();
+    // Get user info from the response headers
+    const userInfo = response.headers.get('X-User-Info');
+    if (userInfo) {
+      const user = JSON.parse(userInfo);
+      const headerTitle = document.querySelector('header h1');
+      headerTitle.innerHTML = `💳 BudgetHelper - ${user.username}`;
+    }
+  } catch (error) {
+    console.error("Error getting user info:", error);
+  }
+}
+
+// Handle unauthorized responses
+async function handleResponse(response) {
+  if (response.status === 401) {
+    // Session expired or unauthorized
+    window.location.href = "/login";
+    return null;
+  }
+  return response;
+}
+
+// Load and display transactions
+async function loadTransactions() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/transactions`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include"
+    });
+
+    const handledResponse = await handleResponse(response);
+    if (!handledResponse) return;
+
+    const transactions = await handledResponse.json();
     const transactionList = document.getElementById("transactionList");
     transactionList.innerHTML = "";
 
@@ -98,15 +133,10 @@ form.addEventListener("submit", async e => {
       body: JSON.stringify({ amount, description, date, type })
     });
 
-    if (!res.ok) {
-      if (res.status === 401) {
-        window.location.href = `${API_BASE_URL}/login`;
-        return;
-      }
-      throw new Error('Failed to add transaction');
-    }
+    const handledResponse = await handleResponse(res);
+    if (!handledResponse) return;
 
-    const data = await res.json();
+    const data = await handledResponse.json();
     predictionText.textContent = `Predicted category: ${data.category}`;
     form.reset();
     loadTransactions();
@@ -134,16 +164,10 @@ async function getPrediction() {
       credentials: "include"
     });
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        window.location.href = "/login";
-        return;
-      }
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to get prediction");
-    }
+    const handledResponse = await handleResponse(response);
+    if (!handledResponse) return;
 
-    const data = await response.json();
+    const data = await handledResponse.json();
     const forecastList = document.getElementById("forecastList");
     if (!forecastList) return;
     forecastList.innerHTML = "";
@@ -196,4 +220,5 @@ logoutButton.addEventListener("click", async () => {
 });
 
 // Initial loading
+getCurrentUser();
 loadTransactions();

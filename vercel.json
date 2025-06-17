@@ -1,0 +1,53 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "frontend/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "build"
+            }
+        },
+        {
+            "src": "backend/app.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/login",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/register",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/transactions",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/predict",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/logout",
+            "dest": "/backend/app.py"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/frontend/build/$1"
+        },
+        {
+            "handle": "filesystem"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/frontend/build/index.html"
+        }
+    ]
+}

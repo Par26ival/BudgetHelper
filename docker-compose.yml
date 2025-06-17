@@ -7,3 +7,30 @@ services:
       - "5000:5000"
     volumes:
       - ./backend:/app
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    restart: always
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    restart: always
